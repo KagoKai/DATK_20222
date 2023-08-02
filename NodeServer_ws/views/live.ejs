@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP Website</title>
+    <link rel="stylesheet" type="text/css" href="/style.css"/>
+</head>
+
+<body>
+    <div id="container">
+        <div id="header">
+            <img class="logo" src="/Logo.png" width=40px height=60px/>
+            <h1 class="webname">ESP Video Database</h1>
+        </div>
+
+        <div id="content">
+            <div id="nav">
+                <h3 class="navname">Navigation</h3>
+                <ul class="navlist">
+                    <li><a  href="/">Video</a></li>
+                    <li><a class="active" href="">Live</a></li>
+                </ul>
+            </div>
+
+            <div id="main">
+                <h2 class="greeting">Live Streaming</h2>
+                <p>Dữ liệu trực tiếp từ ESP32-CAM sẽ được truyền đến đây:</p>
+                <div id="streamBox">
+                    <img id="stream" height='480' width='640' src="" alt="Stream is currently OFFLINE">
+                </div>
+                <script>
+                    const img = document.getElementById("stream");
+
+                    portStr = "";
+                    if (location.port != "") {
+                        portStr = ":" + location.port;
+                    }
+                    protocolStr = "ws"
+                    if (location.protocol === "https:") {
+                        protocolStr = "wss";
+                    }
+                    
+                    let clientURL = protocolStr + "://" + location.hostname+portStr + "/stream_client";
+                    
+                    // Tạo WebSocket Client để truy cập từ phía user
+                    var ws = new WebSocket(clientURL);
+                    
+                    let urlObject;
+                    ws.onopen = function() {
+                        ws.send("Stream started at: " + clientURL);
+                    }
+                    ws.onmessage = function(message) {
+                        if (message === "TERMINATE") {
+                            img.src = "";
+                        } else {
+                            const arrayBuffer = message.data;
+                            if(urlObject) {
+                                URL.revokeObjectURL(urlObject);
+                            }
+                            urlObject = URL.createObjectURL(new Blob([arrayBuffer]));
+                            img.src = urlObject;
+                        }
+                    } 
+                </script>
+            </div>
+        </div>
+
+        <div id="footer">
+            <p class="trademark">Copyright &copy HUST 2023</p>
+        </div>
+
+    </div>
+</body>
+</html>

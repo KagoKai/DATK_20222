@@ -33,7 +33,6 @@ io.on('connection', (socket) => {
   console.log(`Connected to client ${socket.id}`)
 
   socket.on('jpgstream_serverio', (msg) => {
-    console.log('Received image')
     io.to('webusers').emit('jpgstream_client', msg.pic);
   });
   
